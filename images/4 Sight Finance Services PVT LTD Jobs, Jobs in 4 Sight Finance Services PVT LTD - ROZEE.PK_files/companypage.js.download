@@ -1,0 +1,642 @@
+var pgJbMore = function () {
+	
+	var offset = $('#pgJobCnt').val();
+    var lastId = $('#pgJoblastId').val();
+	var pComp  = $('#cCompPage').val();
+	$('#spinMrJobs').toggle();
+	if (offset && offset != '') {
+        
+        $.post(ajax_url + 'company/morePageJobs', {'offset': offset, 'lastId': lastId, 'pComp': pComp}, 'json').done(function (response) {
+			$('#spinMrJobs').toggle();
+			if (response.jobs) {
+				
+				$.each(response.jobs, function (index, jobs) {
+												 
+					$('#pgJobsList').append('<div class="job"><div class="pull-left nrs-16 mt5">'+jobs.jTitle+'</div><a  class="btn stroke pull-right sbtn" href="'+jobs.jLink+'" >'+jobs.jCap+'</a><div class="clearfix"></div></div>');								
+				
+				});
+				$('#pgJobCnt').val(response.jobsOffset);
+				$('#pgJoblastId').val(response.jobsLastId);
+				if(response.totalJobs > 5)
+					 $('#pgJobMr').show();
+				else
+					 $('#pgJobMr').hide();
+			
+			} else {
+                $('#spinMrJobs').toggle();
+            }
+        }).fail(function () {
+			$('#spinMrJobs').toggle();
+        });
+    }
+}
+var savPolVote = function () {
+	
+	$('#polBtn').toggle();
+	$('#polSpn').toggle();
+	var ques = $('#polQues').val();
+	var optn = jQuery('input:radio[name=optn]:checked').val();
+	var pComp  = $('#cCompPage').val();
+	
+	$.post(ajax_url + 'company/savePollVote', {'optn': optn, 'ques': ques, 'pComp': pComp}, 'json').done(function (response) {
+			
+			$('#polSpn').toggle();
+			$('#polBtn').toggle();
+			if(response.msgType == 'ERR')
+			{
+				commonAlert('warning', response.msg,'hide','msgDivPoll');		
+			}
+			else
+			{
+				commonAlert('success', response.msg,'hide','msgDivPoll');		
+			}
+           
+        }).fail(function () {
+			
+			$('#polSpn').toggle();
+			$('#polBtn').toggle();
+     });
+	
+}
+var pgCompUpd = function () {
+	
+	$('#cmpUptBtn').toggle();
+	$('#updInfoSpn').toggle();
+	
+	var params = {};
+    params = $('#pageCompanyInfo').serialize();
+	
+	$.post(ajax_url + 'company/pageCompanyUpdate', params, 'json').done(function (response) {
+			$('#updInfoSpn').toggle();
+			$('#cmpUptBtn').toggle();
+			if(response.msgType == 'ERR')
+			{
+				commonAlert('warning', response.msg);		
+			}
+			else
+			{
+				commonAlert('success', response.msg);		
+			}																	  
+						
+			           
+        }).fail(function () {
+			$('#updInfoSpn').toggle();
+			$('#cmpUptBtn').toggle();
+		});
+}
+var saveSett = function () {
+	
+	$('#cmpSetBtn').toggle();
+	$('#setSpn').toggle();
+	
+	var params = {};
+    params = $('#pageSettings').serialize();
+	
+	$.post(ajax_url + 'company/pageSettings', params, 'json').done(function (response) {
+			$('#setSpn').toggle();
+			$('#cmpSetBtn').toggle();
+			if(response.msgType == 'ERR')
+				commonAlert('warning', response.msg);
+			else
+				commonAlert('success', response.msg);		
+	
+	}).fail(function () {
+			$('#setSpn').toggle();
+			$('#cmpSetBtn').toggle();
+		});
+}
+var actPol = function (id,act) {
+
+  if(act == 'active')
+  	var conMsg  = $('#actMsg').val();
+  else
+  	var conMsg  = $('#deActMsg').val();
+	
+  if(confirm(conMsg))
+  {
+	var pComp  = $('#compID').val();
+
+	$.post(ajax_url + 'company/pageManPoll', {'id': id, 'act': act, 'pComp' : pComp}, 'json').done(function (response) {
+		
+		if(response.act == 'active')
+		{
+			$('.polAct').hide();
+			$('.polDeact').show();
+			
+			$('#pollAct_d'+id).toggle();																										            $('#pollAct_a'+id).toggle();
+		}
+		if(response.act == 'deactive')
+		{
+			$('#pollAct_d'+id).toggle();																										            $('#pollAct_a'+id).toggle();
+		}
+		
+	}).fail(function () {
+
+	});
+  }
+}
+var addPoll = function () {
+	
+	$('.polSpn').toggle();
+	$('#adPolBtn').hide();
+	var pLink = $('#pgPerma').val();
+	var params = {};
+    params = $('#addPollForm').serialize();
+
+	$.post(ajax_url + 'company/pageAddPoll', params, 'json').done(function (response) {
+	 $('.polSpn').toggle();																		
+	 if(response.msgType == 'ERR')
+	 {
+		commonAlert('warning', response.msg);		 
+	 	$('#adPolBtn').show();
+	 }
+	 else
+	 {
+	 	commonAlert('success', response.msg,'');
+		$('#adPolBtn').hide();
+	 }
+	}).fail(function () {
+
+	});
+}
+var editPoll = function () {
+	
+	$('.polSpn').toggle();
+	var pLink = $('#pgPerma').val();
+	var params = {};
+    params = $('#addPollForm').serialize();
+
+	$.post(ajax_url + 'company/pageEditPoll', params, 'json').done(function (response) {
+	
+	$('.polSpn').toggle();
+	if(response.msgType == 'ERR')
+		commonAlert('warning', response.msg);		 
+	else
+	{
+		commonAlert('success', response.msg);																		
+		window.location = seeker_url+'company/'+pLink+'/mp';	
+	}
+	
+	}).fail(function () {
+
+	});
+}
+var pollGraph = function (cid,pid) {
+	
+	$.post(ajax_url + 'company/pagePollGraph', {'cid': cid, 'pid': pid}, 'json').done(function (response) {
+																								
+		if(response.count == 0)
+		{
+			$('#polQues').html(response.question);
+			$('#graph').html(response.msg);
+			$('#pgPollGraph').modal('show');	
+		}
+		else if(response.count > 0)
+		{
+			$('#polQuesDe').html(response.question+' &nbsp;&nbsp; '+response.detailGraph);
+			$('#pgPollGraph').modal('show');	
+			$('#graph').highcharts({
+                    chart: {
+                        type: 'pie',
+                        backgroundColor: 'rgba(0,0,0,0)',
+                        spacingRight: 70,
+                        spacingLeft: 70,
+                    },
+                    title: {
+                        
+                        text: '<b style="color: #2d5fac ">'+response.msg+'</b>'
+                    },
+                    yAxis: {
+                        title: {
+                            text: ' '
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+//                        
+                            borderWidth: 0,
+                            showInLegend: false,
+                            size: '100%',
+                            innerSize: '0%',
+                            data: response.graphData
+                        }
+                    },
+                    tooltip: {
+                        useHTML: true,
+                        pointFormat: '<b>{point.percentage:.1f}%</b>'
+                    },
+                    series: [
+                        {
+                            type: 'pie',
+                            name: 'Percentage:',
+                            dataLabels: {
+                                color: 'white',
+                                shadow: {'color': 'white'},
+                                distance: -60,
+                                style: {
+                                    'textShadow': 'none',
+                                    'fontSize': '15px'
+                                },
+                                formatter: function () {
+                                    if (this.percentage != 0)
+                                        return Math.round(this.percentage) + '%';
+
+                                }
+                            }
+                        },
+                        {
+                            type: 'pie',
+                            name: 'Percentage:',
+                            dataLabels: {
+                                connectorColor: 'grey',
+                                color: 'black',
+                                softConnector: false,
+                                connectorWidth: 1,
+                                verticalAlign: 'top',
+                                distance: 10,
+                                formatter: function () {
+                                    if (this.percentage != 0)
+                                        return this.point.name;
+
+                                }
+                            }
+                        }
+                    ],
+                    exporting: {
+                        enabled: false
+                    }
+                });
+		}
+
+	}).fail(function () {
+
+	});
+}
+var pgPicMore = function () {
+	
+	var offset = $('#pgPicCnt').val();
+    var lastId = $('#pgPiclastId').val();
+	var pComp  = $('#cCompPage').val();
+	var pgManager = $('#isPgManager').val();
+	$('#spinMrPhoto').toggle();
+	if (offset && offset != '') {
+        
+        $.post(ajax_url + 'company/morePagePhotos', {'offset': offset, 'lastId': lastId, 'pComp': pComp}, 'json').done(function (response) {
+			$('#spinMrPhoto').toggle();
+			if (response.photos) {
+				
+				$.each(response.photos, function (index, photos) {
+				
+				$('#pgPicList').append('<div class="project pull-left "><div class="p-thum"><img src="'+photos.pic_url+'"></div><div class="pull-right action">'+(pgManager == 'Y' ? '<a href="javascript:;" onclick="deleteMedia('+photos.enc_pic_id+',\'photo\');"><i class="rz-delete text-center circle ml10  red pull-left"></i></a>' : '')+'</div></div>');								
+				
+				});
+				$('#pgPicCnt').val(response.photosOffset);
+				$('#pgPiclastId').val(response.photosLastId);
+				if(response.totalPhotos > 30)
+					 $('#pgPhotoMr').show();
+				else
+					 $('#pgPhotoMr').hide();
+			
+			} else {
+                $('#spinMrPhoto').toggle();
+            }
+        }).fail(function () {
+			$('#spinMrPhoto').toggle();
+        });
+    }
+}
+var pgVideoMore = function () {
+	
+	var offset = $('#pgVideoCnt').val();
+    var lastId = $('#pgVideolastId').val();
+	var pComp  = $('#cCompPage').val();
+	var pgManager = $('#isPgManager').val();
+	$('#spinMrVideo').toggle();
+	if (offset && offset != '') {
+        
+        $.post(ajax_url + 'company/morePageVideos', {'offset': offset, 'lastId': lastId, 'pComp': pComp}, 'json').done(function (response) {
+			$('#spinMrVideo').toggle();
+			if (response.videos) {
+				
+				$.each(response.videos, function (index, videos) {
+												  
+				$('#pgVideoList').append('<div class="project pull-left " data-toggle="modal" data-target="#ProjectModal"><div class="p-thum">'+videos.iframe+'</div><div class="pull-right action">'+(pgManager == 'Y' ? '<a href="javascript:;" onclick="deleteMedia('+videos.enc_link_id+',\'video\');"><i class="rz-delete  text-center circle ml10  red pull-left"></i></a>' : '')+'</div></div>');								
+				
+				});
+				$('#pgVideoCnt').val(response.videosOffset);
+				$('#pgVideolastId').val(response.videosLastId);
+				if(response.totalVideos > 1)
+					 $('#pgVideoMr').show();
+				else
+					 $('#pgVideoMr').hide();
+			
+			} else {
+                $('#spinMrVideo').toggle();
+            }
+        }).fail(function () {
+			$('#spinMrVideo').toggle();
+        });
+    }
+}
+
+var deleteMedia = function (id, type) {
+	
+	var pLink = $('#pgPerma').val();
+	var pComp  = $('#cCompPage').val();
+	
+	if(type == 'photo')
+		var conf = $('#delConfPhoto').val();
+	else
+		var conf = $('#delConfVideo').val();
+	
+	if (confirm(conf)) {
+	
+		$.post(ajax_url + 'company/deleteMedia', {'id': id, 'type': type, 'pComp' : pComp}, 'json').done(function (response) {
+		
+		if(response.msgType == 'SUC')
+		{
+			window.location = seeker_url+'company/'+pLink+'/media';		
+		}
+		else
+		{
+			commonAlert('warning', response.msg);	
+		}
+		
+	}).fail(function () {
+
+		});
+	}
+}
+
+var delCoverImg = function (id) {
+	
+	var pLink = $('#pgPerma').val();
+	var pComp  = $('#cCompPage').val();
+	var pgManager = $('#isPgManager').val();
+	var conf = $('#delConfCover').val();
+	
+	if (confirm(conf)) {
+	
+		$.post(ajax_url + 'company/remCoverImage', {'id': id, 'pComp' : pComp, 'pgManager' : pgManager}, 'json').done(function (response) {
+		
+		if(response.msgType == 'SUC')
+		{
+			window.location = seeker_url+'company/'+pLink+'/upHi';		
+		}
+		else
+		{
+			commonAlert('warning', response.msg);	
+		}
+		
+	}).fail(function () {
+
+		});
+	}
+}
+var ldAllNotif = function () {
+
+	$('#ldNotifAll').show();
+	$('#mrNotifAct').hide();
+}
+
+var cLogoUpload = function () {
+	
+	var pLink = $('#pgPerma').val();
+	var pComp  = $('#cCompPage').val();
+	var pgManager = $('#isPgManager').val();
+	var cLogo = $(".userImgd input[name='frmImages']").val();
+    $(".userImgd input[name='frmImages']").val('');
+    
+	$.post(ajax_url + 'company/uploadCompanyLogo', {'pComp' : pComp, 'cLogo': cLogo}, 'json').done(function (response) {
+		
+	if(response.msgType == 'ERR')
+	{
+		alert(response.msg);
+		$(".userImgd input[name='maxFiles']").val(1);
+		$(".userImgd input[name='frmImages']").val('');
+	}
+	else
+		window.location = seeker_url+'company/'+pLink+'/home';		
+		
+	}).fail(function () {
+
+	});	
+}
+
+var chCompLogo = function () {
+	
+	$("#companyLogoUpload input[name='file']").click();
+}
+
+var adPgPic = function () {
+	
+	$("#pgPicUpload input[name='file']").click();
+}
+
+var pgPicUpload = function () {
+	
+	$('#spinPUpload').toggle();
+	var pLink = $('#pgPerma').val();
+	var pComp  = $('#cCompPage').val();
+	var pgManager = $('#isPgManager').val();
+	var pPhoto = $(".photoImgd input[name='frmImages']").val();
+    $(".photoImgd input[name='frmImages']").val('');
+    
+	$.post(ajax_url + 'company/uploadPhoto', {'pComp' : pComp, 'pPhoto': pPhoto}, 'json').done(function (response) {
+	
+	$('#spinPUpload').toggle();
+	window.location = seeker_url+'company/'+pLink+'/media';		
+		
+	}).fail(function () {
+			$('#spinPUpload').toggle();
+
+	});	
+}
+
+function CoverImgUpload()
+{
+    var params = {};
+    params.img = $(".coverImgd input[name='frmImages']").val();
+    var url = ajax_url + 'dashboard/CoverUpload';
+    $(".coverImgd input[name='frmImages']").val('');
+    $(".spinner_loader").show();
+    $(".qq-upload-list").hide();
+
+    var successCallback = function (res) {
+        res = jQuery.parseJSON(res);
+        if (res.success == true) {
+            var imgC = assets_url + res.coverImg;
+            $(".spinner_loader, .CoverPicModal .modal-footer, .qq-upload-list").hide();
+            //$(".cover").css("background", "url(" + imgC + ")");
+            coverImageCroper.cropit('imageSrc', $('#cUpload .qq-upload-preview img').attr('src'));
+        }
+    };
+
+
+    ajx(url, 'post', params, successCallback, 'html');
+}
+
+
+var chCoverPhoto = function () {
+	
+	$(".CoverPicModal").modal();
+    $(".cropCoverformsb").removeAttr("disabled");
+    $(".qq-upload-list").hide();
+	
+	var imgDet = $('#cUpload .qq-upload-preview img');
+	if(typeof imgDet[0] !== 'undefined' && imgDet[0].naturalWidth < 500)
+	{
+		var errMsg = $('#lessCoverSize').val();
+		alert(errMsg);
+		$(".userImgd input[name='maxFiles']").val(1);
+		$(".userImgd input[name='frmImages']").val('');
+		$("#cUpload .qq-upload-list").html('');
+		return;
+	}
+	else
+	{
+		startCropperDiv();
+		coverImageCroper.cropit('imageSrc', $('#cUpload .qq-upload-preview img').attr('src'));
+	}
+}
+
+function startCropperDiv()
+{
+	//var coverPhoto = $("#imgData").val();
+	coverImageCroper = $('.image-editor').cropit(
+            {
+                maxZoom: 2.0,
+                smallImage: 'stretch',
+                onZoomChange: function () {
+                    
+                    var zoom = $(".cropit-image-zoom-input").val();
+                    zoom = parseFloat(zoom);
+                    if (zoom < 0.01)
+                    {
+                        zoom = 0;
+                    }
+                    else
+                    {
+                        zoom = zoom;
+                    }
+                    zoom = zoom * 100;
+
+                    $('.zoomVal').text(parseInt(zoom) + '%');
+                },
+                onFileChange: function () {
+                    var input = this.$fileInput[0];
+                    if (input.files && input.files[0]) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            _imageData = e.target.result;
+                            $(".hidden-image-data-org").val(_imageData);
+                        };
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                },
+                onImageLoaded: function () {
+                    $(".hidden-image-data-org").val($(".cropit-preview-image").attr("src"));
+                },
+                onFileReaderError: function () {
+
+                    alert("Your uploaded image file is not readable,Please try again.")
+                },
+                /*imageState: {
+                    src: coverPhoto,
+                },*/
+            }
+    );
+
+}
+
+var ldCoverImg = function (id) {
+	
+	var pComp   = $('#cCompPage').val();
+	
+	$.post(ajax_url + 'company/loadCover', {'pComp' : pComp, 'imgID' : id}, 'json').done(function (response) {
+																								   		$('#imageId').val(response.imgId);
+		$('#imgData').val(response.coverImg);
+		//chCoverPhoto();
+		$(".CoverPicModal").modal();
+    	$(".cropCoverformsb").removeAttr("disabled");
+    	$(".qq-upload-list").hide();
+		startCropperDiv();
+		coverImageCroper.cropit('imageSrc', response.coverImg);
+
+	}).fail(function () {
+
+	});	
+}
+
+var cropCoverformsb = function () {
+	
+	$('#spinCoverUp').toggle();
+	var pLink 	= $('#pgPerma').val();
+	var pComp   = $('#cCompPage').val();
+	var imgId   = $('#imageId').val();
+	var imgData = $('.image-editor').cropit('export');
+	var orgData = $(".hidden-image-data-org").val();
+	
+	if(orgData == '')
+	{
+		$('#spinCoverUp').toggle();
+		var errMsg = $('#blnkCover').val();
+		alert(errMsg);
+		return;
+	}
+	else
+	{	
+		$.post(ajax_url + 'company/uploadCover', {'pComp' : pComp, 'imgData' : imgData, 'orgData': orgData, 'imgId': imgId}, 'json').done(function (response) {
+		
+		$('#spinCoverUp').toggle();
+		if(response.msgType == 'ERR')
+			commonAlert('warning', response.msg,'hide','coverMsgDiv');
+		else
+		{
+			var cSucMsg = $('#covImgTxt').val();
+			commonAlert('success', cSucMsg,'hide','coverMsgDiv');
+			window.location = seeker_url+'company/'+pLink+'/upHi';		
+		}
+		
+		}).fail(function () {
+				$('#spinCoverUp').toggle();
+		});	
+	}
+}
+
+$(".zommplus").click(function () {
+
+    var zoom = $(".cropit-image-zoom-input").val();
+    zoom = parseFloat(zoom);
+    if (zoom > 1)
+    {
+        zoom = 1;
+    }
+    else
+    {
+        zoom = zoom + 0.1;
+    }
+
+    $(".cropit-image-zoom-input").val(zoom);
+    $(".cropit-image-zoom-input").trigger("change");
+
+
+});
+
+$(".zommminus").click(function () {
+
+    var zoom = $(".cropit-image-zoom-input").val();
+    if (parseFloat(zoom) < 0)
+    {
+        zoom = 0;
+    }
+    else
+    {
+        zoom = parseFloat(zoom) - 0.1;
+    }
+
+    $(".cropit-image-zoom-input").val(zoom);
+    $(".cropit-image-zoom-input").trigger("change");
+
+
+});

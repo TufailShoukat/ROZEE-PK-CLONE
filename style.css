@@ -1,0 +1,143 @@
+.item1 {
+    color: red !important;
+}
+
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+
+.blue {
+    background-color: rgb(10, 10, 43) !important;
+    border: none;
+}
+
+.nav {
+    background-color: white !important;
+
+}
+
+span {
+    color: red;
+}
+
+.radius {
+    border-radius: 75px;
+    height: 150px;
+    width: 150px;
+}
+
+.flex {
+    display: flex !important;
+}
+
+.height {
+    height: 42px !important;
+    width: 100px;
+    text-align: center;
+}
+
+.pading {
+    padding-left: 40% !important;
+}
+
+
+.width {
+    width: 410px !important;
+}
+
+.margin {
+    margin-left: 40% !important;
+}
+
+/* .line{
+     text-decoration: none;
+} */
+.container-fluid {
+    display: flex !important;
+    justify-content: center !important;
+    justify-content: space-evenly !important;
+    border-bottom: 1px solid black !important;
+    height: 50px !important
+}
+
+.green {
+    color: green !important;
+}
+
+.card2 {
+    height: 300px !important;
+    width: 300px !important;
+
+
+
+}
+
+.lead {
+    border-radius: 10px !important;
+    background-color: gray;
+    border: none;
+}
+
+.pro {
+    margin-top: 20px !important;
+    margin-left: 10px !important;
+
+    width: 250px;
+}
+
+
+.cardimg {
+    background-color: white;
+
+    border: 2px solid white;
+}
+
+.img {
+    margin-top: 70px !important;
+}
+
+
+
+
+.heightcard {
+    height: 300px !important;
+    width: 300px;
+    border: none;
+}
+
+.red {
+
+
+
+    color: red;
+}
+
+.menu {
+    display: flex !important;
+    justify-content: space-evenly;
+}
+
+.pt {
+    padding-top: 16px !important;
+}
+
+.border {
+    border: none !important;
+}
+
+.last {
+    font-weight: bold;
+    text-decoration: none !important;
+    color: white !important;
+
+
+
+}
+
+.footer {
+    background-color: black !important
+}
+
+;
